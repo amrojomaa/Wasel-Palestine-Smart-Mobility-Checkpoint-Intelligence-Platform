@@ -1,0 +1,1513 @@
+{
+  "apidogVersion": "1.0.0",
+  "info": {
+    "name": "Wasel Palestine Backend API",
+    "description": "Full API-Dog collection aligned with implemented FastAPI routes for the Wasel Palestine backend.\n\n## Authentication\nThis API uses JWT Bearer authentication.\n1. Call `POST /api/v1/auth/login`.\n2. Save `access_token` and `refresh_token`.\n3. Send `Authorization: Bearer <access_token>` for protected endpoints.\n4. Call `POST /api/v1/auth/refresh` when access token expires.\n\n## Base URL\n`http://localhost:8000`\n\n## Success Response Shape\n```json\n{\n  \"data\": {},\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}\n```\n\n## Error Response Shape\n```json\n{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"Invalid request payload\",\n    \"details\": []\n  }\n}\n```",
+    "version": "1.0.0",
+    "schema": "https://apidog.com/schema/collection/v1"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": {
+      "token": "{{accessToken}}"
+    }
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "description": "Local API base URL"
+    },
+    {
+      "key": "email",
+      "value": "admin@wasel.local",
+      "description": "Seed admin email"
+    },
+    {
+      "key": "password",
+      "value": "Admin#12345",
+      "description": "Seed admin password"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "description": "JWT access token set from login response"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "description": "JWT refresh token set from login response"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "header": []
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"status\": \"ok\"\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"citizen@wasel.local\",\n  \"password\": \"Citizen#12345\",\n  \"full_name\": \"Citizen User\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n    \"email\": \"citizen@wasel.local\",\n    \"full_name\": \"Citizen User\",\n    \"is_active\": true,\n    \"is_verified\": false,\n    \"roles\": [\"citizen\"],\n    \"created_at\": \"2026-04-13T00:00:00Z\",\n    \"updated_at\": \"2026-04-13T00:00:00Z\"\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            },
+            {
+              "name": "422 Validation Error",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"Invalid request payload\",\n    \"details\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login success', function () { pm.response.to.have.status(200); });",
+                  "const body = pm.response.json();",
+                  "pm.environment.set('accessToken', body.data.access_token);",
+                  "pm.environment.set('refreshToken', body.data.refresh_token);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"access_token\": \"jwt-access-token\",\n    \"refresh_token\": \"jwt-refresh-token\",\n    \"token_type\": \"bearer\",\n    \"expires_in\": 900\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n  \"error\": {\n    \"code\": \"UNAUTHORIZED\",\n    \"message\": \"Invalid email or password\",\n    \"details\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"access_token\": \"new-access-token\",\n    \"refresh_token\": \"new-refresh-token\",\n    \"token_type\": \"bearer\",\n    \"expires_in\": 900\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n    \"email\": \"admin@wasel.local\",\n    \"full_name\": \"Wasel Admin\",\n    \"is_active\": true,\n    \"is_verified\": true,\n    \"roles\": [\"admin\"],\n    \"created_at\": \"2026-04-13T00:00:00Z\",\n    \"updated_at\": \"2026-04-13T00:00:00Z\"\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"revoked\": true\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users (Admin)",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                ""
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n      \"email\": \"admin@wasel.local\",\n      \"full_name\": \"Wasel Admin\",\n      \"is_active\": true,\n      \"is_verified\": true,\n      \"roles\": [\"admin\"],\n      \"created_at\": \"2026-04-13T00:00:00Z\",\n      \"updated_at\": \"2026-04-13T00:00:00Z\"\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            },
+            {
+              "name": "403 Forbidden",
+              "status": "Forbidden",
+              "code": 403,
+              "body": "{\n  \"error\": {\n    \"code\": \"FORBIDDEN\",\n    \"message\": \"Insufficient permissions\",\n    \"details\": []\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Checkpoints",
+      "item": [
+        {
+          "name": "List Checkpoints",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkpoints/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "checkpoints",
+                ""
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 101,\n      \"code\": \"QAL-01\",\n      \"name\": \"Qalandia\",\n      \"latitude\": 31.857,\n      \"longitude\": 35.212,\n      \"governorate\": \"Jerusalem\",\n      \"is_active\": true\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Checkpoint",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkpoints/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "checkpoints",
+                ""
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"HWW-01\",\n  \"name\": \"Huwwara\",\n  \"latitude\": 32.1337,\n  \"longitude\": 35.2694,\n  \"governorate\": \"Nablus\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"id\": 102,\n    \"code\": \"HWW-01\",\n    \"name\": \"Huwwara\",\n    \"latitude\": 32.1337,\n    \"longitude\": 35.2694,\n    \"governorate\": \"Nablus\",\n    \"is_active\": true\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Checkpoint",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkpoints/101",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "checkpoints",
+                "101"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 101,\n    \"code\": \"QAL-01\",\n    \"name\": \"Qalandia\",\n    \"latitude\": 31.857,\n    \"longitude\": 35.212,\n    \"governorate\": \"Jerusalem\",\n    \"is_active\": true\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Checkpoint",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkpoints/101",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "checkpoints",
+                "101"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Qalandia Main\",\n  \"is_active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 101,\n    \"code\": \"QAL-01\",\n    \"name\": \"Qalandia Main\",\n    \"latitude\": 31.857,\n    \"longitude\": 35.212,\n    \"governorate\": \"Jerusalem\",\n    \"is_active\": true\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Checkpoint Status History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkpoints/101/status-history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "checkpoints",
+                "101",
+                "status-history"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"checkpoint_id\": 101,\n      \"status\": \"OPEN\",\n      \"reason\": \"Normal flow\",\n      \"source_type\": \"MANUAL\",\n      \"effective_from\": \"2026-04-13T00:00:00Z\",\n      \"effective_to\": null\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add Checkpoint Status",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/checkpoints/101/status-history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "checkpoints",
+                "101",
+                "status-history"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"DELAYED\",\n  \"reason\": \"High traffic\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 2,\n    \"checkpoint_id\": 101,\n    \"status\": \"DELAYED\",\n    \"reason\": \"High traffic\",\n    \"source_type\": \"MANUAL\",\n    \"effective_from\": \"2026-04-13T00:05:00Z\",\n    \"effective_to\": null\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:05:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Incidents",
+      "item": [
+        {
+          "name": "List Incidents",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidents/?status=OPEN&page=1&page_size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "incidents",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "OPEN"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "20"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"category_id\": 2,\n      \"checkpoint_id\": 101,\n      \"title\": \"Heavy queue\",\n      \"description\": \"Long waiting time\",\n      \"severity\": 3,\n      \"status\": \"OPEN\",\n      \"latitude\": 31.85,\n      \"longitude\": 35.21,\n      \"reported_at\": \"2026-04-13T00:00:00Z\",\n      \"confidence_score\": 0.8\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Incident",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidents/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "incidents",
+                ""
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 2,\n  \"checkpoint_id\": 101,\n  \"title\": \"Checkpoint closed\",\n  \"description\": \"Road closed for inspection\",\n  \"severity\": 4,\n  \"latitude\": 31.85,\n  \"longitude\": 35.21,\n  \"occurred_at\": \"2026-04-13T00:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"id\": 2,\n    \"category_id\": 2,\n    \"checkpoint_id\": 101,\n    \"title\": \"Checkpoint closed\",\n    \"description\": \"Road closed for inspection\",\n    \"severity\": 4,\n    \"status\": \"OPEN\",\n    \"latitude\": 31.85,\n    \"longitude\": 35.21,\n    \"reported_at\": \"2026-04-13T00:00:00Z\",\n    \"confidence_score\": 0.75\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Incident",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidents/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "incidents",
+                "1"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"category_id\": 2,\n    \"checkpoint_id\": 101,\n    \"title\": \"Heavy queue\",\n    \"description\": \"Long waiting time\",\n    \"severity\": 3,\n    \"status\": \"OPEN\",\n    \"latitude\": 31.85,\n    \"longitude\": 35.21,\n    \"reported_at\": \"2026-04-13T00:00:00Z\",\n    \"confidence_score\": 0.8\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Incident",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidents/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "incidents",
+                "1"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_REVIEW\",\n  \"severity\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"category_id\": 2,\n    \"checkpoint_id\": 101,\n    \"title\": \"Heavy queue\",\n    \"description\": \"Long waiting time\",\n    \"severity\": 4,\n    \"status\": \"IN_REVIEW\",\n    \"latitude\": 31.85,\n    \"longitude\": 35.21,\n    \"reported_at\": \"2026-04-13T00:00:00Z\",\n    \"confidence_score\": 0.8\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify Incident",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidents/1/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "incidents",
+                "1",
+                "verify"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"verify\",\n  \"reason\": \"Confirmed by moderator\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 5,\n    \"incident_id\": 1,\n    \"action\": \"verify\",\n    \"previous_status\": \"IN_REVIEW\",\n    \"new_status\": \"VERIFIED\",\n    \"reason\": \"Confirmed by moderator\",\n    \"verifier_user_id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n    \"created_at\": \"2026-04-13T00:00:00Z\"\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Incident Verification Events",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/incidents/1/verification-events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "incidents",
+                "1",
+                "verification-events"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 5,\n      \"incident_id\": 1,\n      \"action\": \"verify\",\n      \"previous_status\": \"IN_REVIEW\",\n      \"new_status\": \"VERIFIED\",\n      \"reason\": \"Confirmed by moderator\",\n      \"verifier_user_id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n      \"created_at\": \"2026-04-13T00:00:00Z\"\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Create Report",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                ""
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": 2,\n  \"checkpoint_id\": 101,\n  \"latitude\": 31.85,\n  \"longitude\": 35.21,\n  \"description\": \"Heavy waiting line for more than 30 minutes\",\n  \"source_channel\": \"MOBILE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"id\": 10,\n    \"user_id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n    \"incident_id\": null,\n    \"category_id\": 2,\n    \"checkpoint_id\": 101,\n    \"description\": \"Heavy waiting line for more than 30 minutes\",\n    \"status\": \"PENDING\",\n    \"duplicate_of_report_id\": null,\n    \"credibility_score\": 0.5,\n    \"reported_at\": \"2026-04-13T00:00:00Z\"\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            },
+            {
+              "name": "429 Rate Limited",
+              "status": "Too Many Requests",
+              "code": 429,
+              "body": "{\n  \"error\": {\n    \"code\": \"RATE_LIMITED\",\n    \"message\": \"Too many reports submitted\",\n    \"details\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Reports",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/?status=PENDING&mine_only=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "mine_only",
+                  "value": "false"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 10,\n      \"user_id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n      \"incident_id\": null,\n      \"category_id\": 2,\n      \"checkpoint_id\": 101,\n      \"description\": \"Heavy waiting line for more than 30 minutes\",\n      \"status\": \"PENDING\",\n      \"duplicate_of_report_id\": null,\n      \"credibility_score\": 0.5,\n      \"reported_at\": \"2026-04-13T00:00:00Z\"\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "10"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 10,\n    \"user_id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n    \"incident_id\": null,\n    \"category_id\": 2,\n    \"checkpoint_id\": 101,\n    \"description\": \"Heavy waiting line for more than 30 minutes\",\n    \"status\": \"PENDING\",\n    \"duplicate_of_report_id\": null,\n    \"credibility_score\": 0.5,\n    \"reported_at\": \"2026-04-13T00:00:00Z\"\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Vote Report",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/reports/10/vote",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "reports",
+                "10",
+                "vote"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vote_value\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"report_id\": 10,\n    \"vote_value\": 1,\n    \"updated_credibility_score\": 0.6\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Moderation",
+      "item": [
+        {
+          "name": "Moderation Queue",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/moderation/reports/queue",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "moderation",
+                "reports",
+                "queue"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 10,\n      \"user_id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n      \"incident_id\": null,\n      \"category_id\": 2,\n      \"checkpoint_id\": 101,\n      \"description\": \"Heavy waiting line for more than 30 minutes\",\n      \"status\": \"PENDING\",\n      \"duplicate_of_report_id\": null,\n      \"credibility_score\": 0.5,\n      \"reported_at\": \"2026-04-13T00:00:00Z\"\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Moderation Action",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/moderation/reports/10/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "moderation",
+                "reports",
+                "10",
+                "actions"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\",\n  \"reason\": \"Verified with multiple reports\",\n  \"duplicate_of_report_id\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"id\": 1,\n    \"report_id\": 10,\n    \"action\": \"approve\",\n    \"to_status\": \"APPROVED\",\n    \"created_at\": \"2026-04-13T00:00:00Z\"\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Promote Report To Incident",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/moderation/reports/10/promote-to-incident",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "moderation",
+                "reports",
+                "10",
+                "promote-to-incident"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"report_id\": 10,\n    \"incident_id\": 11,\n    \"status\": \"PROMOTED\"\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "List Subscriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                "subscriptions"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"user_id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n      \"area_name\": \"Ramallah\",\n      \"category_id\": 2,\n      \"min_severity\": 2,\n      \"is_active\": true\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                "subscriptions"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"area_name\": \"Ramallah\",\n  \"category_id\": 2,\n  \"min_severity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"data\": {\n    \"id\": 2,\n    \"user_id\": \"d290f1ee-6c54-4b01-90e6-d701748f0851\",\n    \"area_name\": \"Ramallah\",\n    \"category_id\": 2,\n    \"min_severity\": 2,\n    \"is_active\": true\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Subscription",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/subscriptions/2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                "subscriptions",
+                "2"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"deleted\": true\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List Alerts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/?unread_only=true&subscription_id=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "unread_only",
+                  "value": "true"
+                },
+                {
+                  "key": "subscription_id",
+                  "value": "1"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 100,\n      \"incident_id\": 11,\n      \"category_id\": 2,\n      \"severity\": 4,\n      \"title\": \"Checkpoint closed\",\n      \"body\": \"Closure reported near Ramallah\",\n      \"generated_at\": \"2026-04-13T00:00:00Z\",\n      \"is_read\": false\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark Alert Read",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/alerts/100/mark-read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "alerts",
+                "100",
+                "mark-read"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"alert_id\": 100,\n    \"updated\": true\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Routes",
+      "item": [
+        {
+          "name": "Estimate Route",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/routes/estimate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes",
+                "estimate"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origin\": { \"lat\": 31.9, \"lng\": 35.2 },\n  \"destination\": { \"lat\": 31.8, \"lng\": 35.3 },\n  \"transport_mode\": \"CAR\",\n  \"avoid_checkpoints\": true,\n  \"avoid_area_ids\": [12]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"provider\": \"osrm\",\n    \"estimated_distance_m\": 15400,\n    \"estimated_duration_s\": 1920,\n    \"options\": [\n      { \"rank\": 1, \"distance_m\": 15400, \"duration_s\": 1920 }\n    ],\n    \"factors\": {\n      \"checkpoints_considered\": 2,\n      \"incidents_considered\": 1,\n      \"weather_applied\": true\n    },\n    \"cached\": false\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            },
+            {
+              "name": "422 Validation Error",
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "body": "{\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"Invalid request payload\",\n    \"details\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Geocode",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/routes/geocode?q=Ramallah&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes",
+                "geocode"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Ramallah"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"results\": [\n      {\n        \"display_name\": \"Ramallah, Palestine\",\n        \"lat\": 31.8996,\n        \"lng\": 35.2042,\n        \"type\": \"city\"\n      }\n    ],\n    \"cached\": true\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Route Requests History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/routes/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "routes",
+                "requests"
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 77,\n      \"transport_mode\": \"CAR\",\n      \"request_status\": \"COMPLETED\",\n      \"estimated_distance_m\": 15400,\n      \"estimated_duration_s\": 1920,\n      \"requested_at\": \"2026-04-13T00:00:00Z\"\n    }\n  ],\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Weather",
+      "item": [
+        {
+          "name": "Current Weather",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/weather/current?lat=31.9&lng=35.2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "weather",
+                "current"
+              ],
+              "query": [
+                {
+                  "key": "lat",
+                  "value": "31.9"
+                },
+                {
+                  "key": "lng",
+                  "value": "35.2"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"data\": {\n    \"provider\": \"openweathermap\",\n    \"temperature_c\": 18.2,\n    \"feels_like_c\": 17.4,\n    \"humidity_percent\": 63,\n    \"condition\": \"Clouds\",\n    \"condition_description\": \"broken clouds\",\n    \"wind_speed_mps\": 4.1,\n    \"cached\": false\n  },\n  \"meta\": {\n    \"request_id\": null,\n    \"timestamp\": \"2026-04-13T00:00:00Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

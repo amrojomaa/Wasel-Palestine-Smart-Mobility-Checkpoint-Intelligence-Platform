@@ -1,0 +1,211 @@
+{
+  "info": {
+    "_postman_id": "f9ec47b2-bf2e-4efa-a01c-0460ad60f9b4",
+    "name": "Wasel Backend API Testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "email", "value": "admin@wasel.local" },
+    { "key": "password", "value": "Admin#12345" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health & Auth",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/health" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('health 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        },
+        {
+          "name": "POST /auth/register (idempotent)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"full_name\": \"API Dog User\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('register reachable', function () { pm.expect([201,409]).to.include(pm.response.code); });"
+          ] } }]
+        },
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('login 200', function () { pm.response.to.have.status(200); });",
+            "const body = pm.response.json();",
+            "if (body && body.data) {",
+            "  pm.environment.set('accessToken', body.data.access_token);",
+            "  pm.environment.set('refreshToken', body.data.refresh_token);",
+            "}"
+          ] } }]
+        },
+        {
+          "name": "GET /auth/me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('me 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        },
+        {
+          "name": "POST /auth/refresh",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('refresh 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "Coverage Checks",
+      "item": [
+        {
+          "name": "GET /users/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/users/"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('users reachable', function () { pm.expect([200,403]).to.include(pm.response.code); });"
+          ] } }]
+        },
+        {
+          "name": "GET /checkpoints/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/checkpoints/"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('checkpoints 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        },
+        {
+          "name": "GET /incidents/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/incidents/?page=1&page_size=20"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('incidents 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        },
+        {
+          "name": "GET /reports/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/reports/?mine_only=true"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('reports 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        },
+        {
+          "name": "GET /moderation/reports/queue",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/moderation/reports/queue"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('moderation reachable', function () { pm.expect([200,403]).to.include(pm.response.code); });"
+          ] } }]
+        },
+        {
+          "name": "GET /alerts/subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/alerts/subscriptions"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('subscriptions 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        },
+        {
+          "name": "GET /alerts/",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/alerts/?unread_only=true"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('alerts 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        },
+        {
+          "name": "POST /routes/estimate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"origin\": { \"lat\": 31.9, \"lng\": 35.2 },\n  \"destination\": { \"lat\": 31.8, \"lng\": 35.3 },\n  \"transport_mode\": \"CAR\",\n  \"avoid_checkpoints\": true,\n  \"avoid_area_ids\": [12]\n}" },
+            "url": "{{baseUrl}}/api/v1/routes/estimate"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('route estimate reachable', function () { pm.expect([200,422,503]).to.include(pm.response.code); });"
+          ] } }]
+        },
+        {
+          "name": "GET /routes/geocode",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/routes/geocode?q=Ramallah&limit=5"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('geocode reachable', function () { pm.expect([200,422,503]).to.include(pm.response.code); });"
+          ] } }]
+        },
+        {
+          "name": "GET /routes/requests",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/routes/requests"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('route requests 200', function () { pm.response.to.have.status(200); });"
+          ] } }]
+        },
+        {
+          "name": "GET /weather/current",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/weather/current?lat=31.9&lng=35.2"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('weather reachable', function () { pm.expect([200,422,500,503]).to.include(pm.response.code); });"
+          ] } }]
+        }
+      ]
+    }
+  ],
+  "_postman_exported_at": "2026-04-13T00:00:00.000Z"
+}
