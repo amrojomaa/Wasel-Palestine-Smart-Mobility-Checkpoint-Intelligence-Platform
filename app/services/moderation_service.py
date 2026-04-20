@@ -1,7 +1,5 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import select
-
 from app.core.exceptions import ConflictException, NotFoundException
 from app.db.session import SessionLocal
 from app.models.incident import Incident

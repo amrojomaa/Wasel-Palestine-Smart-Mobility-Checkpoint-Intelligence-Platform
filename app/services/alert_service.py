@@ -5,6 +5,7 @@ from app.db.session import SessionLocal
 from app.models.alert import Alert, AlertDelivery, AlertSubscription
 from app.repositories.alert_repository import AlertRepository
 from app.schemas.alert import AlertDeliveryRead, AlertSubscriptionCreate
+from app.services.audit_service import AuditService
 
 
 class AlertService:
@@ -66,8 +67,6 @@ class AlertService:
                     )
                 )
                 delivered += 1
-
-            from app.services.audit_service import AuditService
 
             AuditService.log(
                 action="ALERT_GENERATED",
