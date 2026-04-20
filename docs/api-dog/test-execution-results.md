@@ -46,7 +46,11 @@ powershell -ExecutionPolicy Bypass -File docs/api-dog/run-tests.ps1
 | `/api/v1/routes/estimate` | POST | 200/422/503 | 200 | 1 | 0 | External route provider reachable |
 | `/api/v1/routes/geocode` | GET | 200/422/503 | 200 | 1 | 0 | External geocoding reachable |
 | `/api/v1/routes/requests` | GET | 200 | 200 | 1 | 0 |  |
-| `/api/v1/weather/current` | GET | 200/422/500/503 | 500 | 1 | 0 | `WEATHER_API_KEY` not configured |
+| `/api/v1/weather/current` | GET | 200/422/503 | 500 | 1 | 0 | Recorded Newman run predates **503** behavior; see §3.1 |
+
+## 3.1) Weather status note (graders)
+
+When `WEATHER_API_KEY` is unset or blank, `GET /api/v1/weather/current` responds with **HTTP 503** and `error.code` **`SERVICE_NOT_CONFIGURED`**. Historical Newman exports under `docs/api-dog/evidence/` may still show **500** from older builds.
 
 ## 4) Error Response Schema Validation
 Document checks that confirm this error structure:

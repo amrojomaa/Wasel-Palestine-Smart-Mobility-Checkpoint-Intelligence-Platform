@@ -88,7 +88,7 @@ Edit `.env` values:
 - `DATABASE_URL`
 - optional seed admin credentials (`SEED_ADMIN_*`)
 - external provider configuration (`ROUTING_*`, `WEATHER_*`)
-- set `WEATHER_API_KEY` for `GET /api/v1/weather/current` (required for weather endpoint)
+- set `WEATHER_API_KEY` for `GET /api/v1/weather/current`; if it is unset or empty, that route returns **HTTP 503** with `error.code` `SERVICE_NOT_CONFIGURED` (not a generic 500)
 
 ### 3) Install dependencies (local mode)
 
@@ -227,7 +227,7 @@ RBAC is applied via role checks:
 
 - OpenWeather current weather endpoint
 - API key managed via environment variable (`WEATHER_API_KEY`)
-- Startup logs include a warning when `WEATHER_API_KEY` is missing
+- Startup logs warn when the key is missing or blank; requests to `/api/v1/weather/current` then receive **HTTP 503** `SERVICE_NOT_CONFIGURED`
 
 ### 3) GraphQL (Bonus)
 
@@ -330,12 +330,12 @@ This repository is structured to support the course deliverables:
 - API contract test execution evidence: `docs/api-dog/test-execution-results.md`
 - Testing strategy (unit/integration/API contract)
 - k6 performance scenarios and reporting templates
-- Git workflow recovery checklist: `docs/process/git-workflow-recovery-plan.md`
 
 ## Submission Alignment Checklist
 
 - Repository description matches project scope (backend API, mobility intelligence, auth/RBAC, integrations, testing evidence).
-- `.env.example` clearly marks weather API requirement (`WEATHER_API_KEY`) for `/api/v1/weather/current`.
+- `.env.example` clearly marks weather API requirement (`WEATHER_API_KEY`) for `/api/v1/weather/current` (missing key → HTTP **503** `SERVICE_NOT_CONFIGURED`).
+- `.gitignore` excludes local SQLite (`local-dev.db`), Python caches, `.pytest_cache`, and bundled `k6` binaries under `tools/k6/` from accidental commits.
 - Performance report includes seeded-data proof and token-pool rerun metrics:
   - `docs/performance/performance-report.md`
   - `docs/performance/results/write-heavy-round-b-token-pool-summary.json`

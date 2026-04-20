@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Query, Request, status
 
 from app.dependencies.auth import get_current_active_user
@@ -21,10 +23,23 @@ def create_report(payload: ReportCreate, request: Request, current_user=Depends(
 def list_reports(
     status_filter: str | None = Query(default=None, alias="status"),
     mine_only: bool = Query(default=False),
+    category_id: int | None = Query(default=None, ge=1),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    sort_by: Literal["created_at", "reported_at", "status", "credibility_score", "category_id"] = Query(default="created_at"),
+    order: Literal["asc", "desc"] = Query(default="desc"),
     current_user=Depends(get_current_active_user),
 ) -> ApiResponse[list[ReportRead]]:
     user_id = current_user.id if mine_only else None
-    rows = ReportService.list_reports(status=status_filter, user_id=user_id)
+    rows = ReportService.list_reports(
+        status=status_filter,
+        user_id=user_id,
+        category_id=category_id,
+        page=page,
+        page_size=page_size,
+        sort_by=sort_by,
+        order=order,
+    )
     return ApiResponse(data=[ReportRead.model_validate(r, from_attributes=True) for r in rows])
 
 

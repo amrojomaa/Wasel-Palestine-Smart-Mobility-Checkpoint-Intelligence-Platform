@@ -201,7 +201,7 @@
             "url": "{{baseUrl}}/api/v1/weather/current?lat=31.9&lng=35.2"
           },
           "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
-            "pm.test('weather reachable', function () { pm.expect([200,422,500,503]).to.include(pm.response.code); });"
+            "pm.test('weather reachable', function () { pm.expect([200,422,503]).to.include(pm.response.code); });"
           ] } }]
         }
       ]

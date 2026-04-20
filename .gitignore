@@ -11,3 +11,11 @@ htmlcov/
 alembic/versions/*.pyc
 .vscode/
 .idea/
+
+# Local databases and cached test DBs
+local-dev.db
+*.sqlite3
+
+# Bundled load-test binary (download from https://k6.io/ if needed)
+tools/k6/**/*.exe
+tools/k6/**/*.zip

@@ -1,10 +1,9 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import select, text
-
 from app.core.exceptions import ConflictException, NotFoundException
 from app.db.session import SessionLocal
 from app.models.incident import Incident, IncidentVerificationEvent
+from app.repositories.incident_repository import IncidentRepository
 from app.schemas.incident import IncidentCreate, IncidentUpdate
 from app.services.audit_service import AuditService
 
@@ -19,27 +18,15 @@ class IncidentService:
         order: str = "desc",
     ) -> list[Incident]:
         with SessionLocal() as db:
-            allowed_sort_columns = {"created_at", "reported_at", "severity", "status"}
-            sort_column = sort_by if sort_by in allowed_sort_columns else "created_at"
-            sort_direction = "ASC" if order.lower() == "asc" else "DESC"
-            where_clause = "WHERE status = :status" if status else ""
-            sql = text(
-                f"""
-                SELECT id
-                FROM incidents
-                {where_clause}
-                ORDER BY {sort_column} {sort_direction}
-                LIMIT :limit OFFSET :offset
-                """
+            ids = IncidentRepository.list_incident_ids_paginated(
+                db,
+                status=status,
+                page=page,
+                page_size=page_size,
+                sort_by=sort_by,
+                order=order,
             )
-            params = {"limit": page_size, "offset": max(page - 1, 0) * page_size}
-            if status:
-                params["status"] = status
-            rows = db.execute(sql, params).fetchall()
-            ids = [row[0] for row in rows]
-            if not ids:
-                return []
-            return list(db.execute(select(Incident).where(Incident.id.in_(ids))).scalars().all())
+            return IncidentRepository.fetch_ordered(db, ids)
 
     @staticmethod
     def create_incident(payload: IncidentCreate, user_id, ip_address: str | None = None, user_agent: str | None = None) -> Incident:
@@ -52,9 +39,7 @@ class IncidentService:
                 created_by_user_id=user_id,
                 confidence_score=50.00,
             )
-            db.add(incident)
-            db.commit()
-            db.refresh(incident)
+            incident = IncidentRepository.add(db, incident)
 
             AuditService.log(
                 action="INCIDENT_CREATED",
@@ -72,7 +57,7 @@ class IncidentService:
     @staticmethod
     def get_incident(incident_id: int) -> Incident:
         with SessionLocal() as db:
-            incident = db.get(Incident, incident_id)
+            incident = IncidentRepository.get_by_id(db, incident_id)
             if not incident:
                 raise NotFoundException(message="Incident not found")
             return incident
@@ -80,7 +65,7 @@ class IncidentService:
     @staticmethod
     def update_incident(incident_id: int, payload: IncidentUpdate) -> Incident:
         with SessionLocal() as db:
-            incident = db.get(Incident, incident_id)
+            incident = IncidentRepository.get_by_id(db, incident_id)
             if not incident:
                 raise NotFoundException(message="Incident not found")
             for k, v in payload.model_dump(exclude_none=True).items():
@@ -93,7 +78,7 @@ class IncidentService:
     @staticmethod
     def verify_incident(incident_id: int, action: str, reason: str | None, user_id, ip_address: str | None = None, user_agent: str | None = None) -> IncidentVerificationEvent:
         with SessionLocal() as db:
-            incident = db.get(Incident, incident_id)
+            incident = IncidentRepository.get_by_id(db, incident_id)
             if not incident:
                 raise NotFoundException(message="Incident not found")
 
@@ -148,13 +133,7 @@ class IncidentService:
     @staticmethod
     def list_verification_events(incident_id: int) -> list[IncidentVerificationEvent]:
         with SessionLocal() as db:
-            incident = db.get(Incident, incident_id)
+            incident = IncidentRepository.get_by_id(db, incident_id)
             if not incident:
                 raise NotFoundException(message="Incident not found")
-            return list(
-                db.execute(
-                    select(IncidentVerificationEvent)
-                    .where(IncidentVerificationEvent.incident_id == incident_id)
-                    .order_by(IncidentVerificationEvent.created_at.desc())
-                ).scalars().all()
-            )
+            return IncidentRepository.list_verification_events(db, incident_id)

@@ -8,7 +8,7 @@ def test_route_estimation_endpoint(test_client, monkeypatch, fake_current_user):
     monkeypatch.setattr(
         RoutingService,
         "estimate_route",
-        lambda payload: {
+        lambda payload, user_id=None: {
             "provider": "osm-osrm",
             "estimated_distance_m": 10000,
             "estimated_duration_s": 1200,
@@ -33,6 +33,26 @@ def test_route_estimation_endpoint(test_client, monkeypatch, fake_current_user):
         )
         assert response.status_code == 200
         assert response.json()["data"]["estimated_duration_s"] == 1200
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_weather_current_returns_503_when_api_key_missing(test_client, monkeypatch, fake_current_user):
+    from app.core import config
+    from app.main import app
+
+    monkeypatch.setattr(config.settings, "weather_api_key", None)
+
+    app.dependency_overrides[get_current_active_user] = lambda: fake_current_user
+    try:
+        response = test_client.get(
+            "/api/v1/weather/current?lat=31.9&lng=35.2",
+            headers={"Authorization": "Bearer x"},
+        )
+        assert response.status_code == 503
+        body = response.json()
+        assert body["error"]["code"] == "SERVICE_NOT_CONFIGURED"
+        assert "WEATHER_API_KEY" in body["error"]["message"]
     finally:
         app.dependency_overrides.clear()
 

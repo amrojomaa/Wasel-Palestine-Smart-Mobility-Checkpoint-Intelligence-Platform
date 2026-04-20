@@ -1,11 +1,10 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import select
-
 from app.core.exceptions import ConflictException, NotFoundException
 from app.db.session import SessionLocal
 from app.models.incident import Incident
 from app.models.report import Report, ReportModerationAction
+from app.repositories.report_repository import ReportRepository
 from app.services.audit_service import AuditService
 
 
@@ -13,13 +12,7 @@ class ModerationService:
     @staticmethod
     def queue() -> list[Report]:
         with SessionLocal() as db:
-            return list(
-                db.execute(
-                    select(Report)
-                    .where(Report.status.in_(["PENDING", "UNDER_REVIEW"]))
-                    .order_by(Report.created_at.desc())
-                ).scalars().all()
-            )
+            return ReportRepository.list_moderation_queue(db)
 
     @staticmethod
     def act(report_id: int, action: str, reason: str | None, duplicate_of_report_id: int | None, moderator_user_id, ip_address: str | None = None, user_agent: str | None = None) -> ReportModerationAction:

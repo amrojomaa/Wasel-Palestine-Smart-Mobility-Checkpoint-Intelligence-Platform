@@ -9,13 +9,14 @@ class OpenWeatherProvider(WeatherProvider):
         self.http_client = http_client
 
     def current_weather(self, lat: float, lng: float) -> dict:
-        if not settings.weather_api_key:
+        raw_key = settings.weather_api_key.get_secret_value() if settings.weather_api_key else ""
+        if not raw_key.strip():
             raise ServiceConfigurationException(message="WEATHER_API_KEY is not configured")
 
         params = {
             "lat": lat,
             "lon": lng,
-            "appid": settings.weather_api_key.get_secret_value(),
+            "appid": raw_key.strip(),
             "units": "metric",
         }
         url = f"{settings.weather_base_url}/weather"

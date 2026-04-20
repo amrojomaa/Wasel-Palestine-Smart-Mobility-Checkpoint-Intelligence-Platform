@@ -1,11 +1,9 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import select
-
 from app.core.exceptions import NotFoundException
 from app.db.session import SessionLocal
 from app.models.alert import Alert, AlertDelivery, AlertSubscription
-from app.models.incident import Incident
+from app.repositories.alert_repository import AlertRepository
 from app.schemas.alert import AlertDeliveryRead, AlertSubscriptionCreate
 from app.services.audit_service import AuditService
 
@@ -14,13 +12,7 @@ class AlertService:
     @staticmethod
     def list_subscriptions(user_id) -> list[AlertSubscription]:
         with SessionLocal() as db:
-            return list(
-                db.execute(
-                    select(AlertSubscription)
-                    .where(AlertSubscription.user_id == user_id)
-                    .order_by(AlertSubscription.id.desc())
-                ).scalars().all()
-            )
+            return AlertRepository.list_subscriptions_for_user(db, user_id)
 
     @staticmethod
     def create_subscription(user_id, payload: AlertSubscriptionCreate) -> AlertSubscription:
@@ -32,24 +24,20 @@ class AlertService:
                 min_severity=payload.min_severity,
                 is_active=True,
             )
-            db.add(sub)
-            db.commit()
-            db.refresh(sub)
-            return sub
+            return AlertRepository.add_subscription(db, sub)
 
     @staticmethod
     def delete_subscription(user_id, subscription_id: int) -> None:
         with SessionLocal() as db:
-            sub = db.get(AlertSubscription, subscription_id)
+            sub = AlertRepository.get_subscription(db, subscription_id)
             if not sub or sub.user_id != user_id:
                 raise NotFoundException(message="Subscription not found")
-            db.delete(sub)
-            db.commit()
+            AlertRepository.delete_subscription(db, sub)
 
     @staticmethod
     def generate_for_verified_incident(incident_id: int, actor_user_id) -> dict:
         with SessionLocal() as db:
-            incident = db.get(Incident, incident_id)
+            incident = AlertRepository.get_incident(db, incident_id)
             if not incident:
                 raise NotFoundException(message="Incident not found")
 
@@ -61,18 +49,9 @@ class AlertService:
                 body=incident.description or "A verified incident was reported.",
                 generated_at=datetime.now(timezone.utc),
             )
-            db.add(alert)
-            db.commit()
-            db.refresh(alert)
+            alert = AlertRepository.add_alert(db, alert)
 
-            subs = list(
-                db.execute(
-                    select(AlertSubscription)
-                    .where(AlertSubscription.is_active.is_(True))
-                    .where((AlertSubscription.category_id.is_(None)) | (AlertSubscription.category_id == incident.category_id))
-                    .where(AlertSubscription.min_severity <= incident.severity)
-                ).scalars().all()
-            )
+            subs = AlertRepository.matching_subscriptions(db, incident.category_id, incident.severity)
 
             now = datetime.now(timezone.utc)
             delivered = 0
@@ -103,18 +82,12 @@ class AlertService:
     @staticmethod
     def list_alerts(user_id, unread_only: bool = False, subscription_id: int | None = None) -> list[AlertDeliveryRead]:
         with SessionLocal() as db:
-            stmt = (
-                select(AlertDelivery, Alert)
-                .join(Alert, Alert.id == AlertDelivery.alert_id)
-                .where(AlertDelivery.user_id == user_id)
-                .order_by(Alert.generated_at.desc())
+            rows = AlertRepository.list_deliveries_join_alerts(
+                db,
+                user_id,
+                unread_only=unread_only,
+                subscription_id=subscription_id,
             )
-            if unread_only:
-                stmt = stmt.where(AlertDelivery.read_at.is_(None))
-            if subscription_id is not None:
-                stmt = stmt.where(AlertDelivery.subscription_id == subscription_id)
-
-            rows = db.execute(stmt).all()
             return [
                 AlertDeliveryRead(
                     id=alert.id,
@@ -134,11 +107,7 @@ class AlertService:
     @staticmethod
     def mark_read(alert_id: int, user_id) -> dict:
         with SessionLocal() as db:
-            delivery = db.execute(
-                select(AlertDelivery)
-                .where(AlertDelivery.alert_id == alert_id)
-                .where(AlertDelivery.user_id == user_id)
-            ).scalar_one_or_none()
+            delivery = AlertRepository.get_delivery_for_user(db, alert_id, user_id)
             if not delivery:
                 raise NotFoundException(message="Alert delivery not found")
             if delivery.read_at is None:
