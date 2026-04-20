@@ -40,8 +40,10 @@ class RateLimitedException(AppException):
 
 
 class ServiceConfigurationException(AppException):
-    status_code = 500
-    code = "CONFIG_ERROR"
+    """Raised when optional integration settings are missing (e.g. WEATHER_API_KEY)."""
+
+    status_code = 503
+    code = "SERVICE_NOT_CONFIGURED"
 
 
 class UpstreamServiceException(AppException):

@@ -20,7 +20,7 @@ async def lifespan(_: FastAPI):
         logger.warning(
             "weather_api_key_missing",
             extra={
-                "impact": "GET /api/v1/weather/current will return configuration error until WEATHER_API_KEY is set"
+                "impact": "GET /api/v1/weather/current will return HTTP 503 SERVICE_NOT_CONFIGURED until WEATHER_API_KEY is set",
             },
         )
     if settings.auto_create_tables and settings.app_env != "testing":
