@@ -2,6 +2,10 @@
 
 Use this file as evidence that the API collection was executed and validated.
 
+Feature-ID traceability note:
+- Postman request names use feature prefixes (for example, `[F03] GET /incidents/`) to align with Wiki numbering.
+- Canonical mapping is maintained in `docs/wiki-feature-index.md`.
+
 ## Quick Run Command
 Run the automated collection runner:
 

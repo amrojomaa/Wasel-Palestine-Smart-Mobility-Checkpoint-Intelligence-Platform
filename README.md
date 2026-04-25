@@ -197,7 +197,7 @@ All endpoints are versioned under:
   - `GET /routes/requests`
 - Weather integration:
   - `GET /weather/current`
-- GraphQL bonus:
+- GraphQL:
   - `POST /graphql`
 
 ## Authentication Flow (JWT Access + Refresh)
@@ -229,7 +229,7 @@ RBAC is applied via role checks:
 - API key managed via environment variable (`WEATHER_API_KEY`)
 - Startup logs warn when the key is missing or blank; requests to `/api/v1/weather/current` then receive **HTTP 503** `SERVICE_NOT_CONFIGURED`
 
-### 3) GraphQL (Bonus)
+### 3) GraphQL
 
 - Optional GraphQL endpoint available at `/api/v1/graphql`
 - Useful for flexible read queries over summary data
