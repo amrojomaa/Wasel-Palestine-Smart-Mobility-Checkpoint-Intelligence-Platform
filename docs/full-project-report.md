@@ -60,7 +60,7 @@ Reference diagram: `docs/architecture/system-architecture.md`.
 ## 5) Technology Stack
 - **Language:** Python
 - **Framework:** FastAPI
-- **GraphQL (bonus):** Strawberry GraphQL router
+- **GraphQL:** Strawberry GraphQL router
 - **Database:** PostgreSQL
 - **ORM:** SQLAlchemy 2.x
 - **Migrations:** Alembic
@@ -105,7 +105,7 @@ All endpoints are namespaced under `/api/v1`.
 - Alerts: subscriptions/list/mark-read
 - Routes: estimate/geocode/history
 - Weather: current weather
-- GraphQL (bonus): summary queries endpoint
+- GraphQL: summary queries endpoint
 
 ### 7.3 API Query Features
 `GET /incidents/` supports:
@@ -188,6 +188,8 @@ Reference: `docs/performance/performance-report.md`.
 - ERD diagram: available (`docs/architecture/erd-diagram.md`)
 - API-Dog execution evidence: available (`docs/api-dog/test-execution-results.md`)
 - Performance report with real metrics: available (`docs/performance/performance-report.md`)
+- Progress report: available (`docs/progress-report.md`)
+- Delivery checklist and demo script: available (`docs/evaluation-delivery-checklist.md`, `docs/demo-script.md`)
 
 ## 14) Repository Layer and ORM vs Raw SQL (Database Course Criteria)
 Core domain entities use dedicated repository modules under `app/repositories/`:
@@ -209,7 +211,12 @@ Grader-visible raw SQL strings also remain in `user_repository.py` (`get_roles_r
 ## 16) Conclusion
 Wasel Palestine demonstrates a strong backend engineering implementation with clean architecture, secure API workflows, and robust documentation/testing artifacts. Remaining optional polish is mainly process-focused (extended soak realism and continued traceability in git history), not a core architecture rewrite.
 
-## 27) GraphQL 
+## 17) GraphQL 
 - A lightweight GraphQL endpoint is provided at `/api/v1/graphql`.
-- It exposes read-focused bonus queries such as `health`, `systemStats`, and `recentIncidentTitles`.
-- This bonus path is isolated from core REST grading criteria and does not change mandatory API behavior.
+- It exposes read-focused queries such as `health`, `systemStats`, and `recentIncidentTitles`.
+- This path is isolated from core REST grading criteria and does not change mandatory API behavior.
+
+## 18) Feature Traceability for Evaluation
+- Numbered feature index for Wiki/Postman/Swagger alignment is available in `docs/wiki-feature-index.md`.
+- Swagger endpoint groups are tagged with feature IDs (`F01..F10`) via `app/api/v1/router.py`.
+- Postman request names are prefixed with matching feature IDs in `docs/api-dog/wasel-api-testing.postman_collection.json`.
